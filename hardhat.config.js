@@ -1,18 +1,18 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('@nomiclabs/hardhat-truffle5');
 require("@nomiclabs/hardhat-web3");
-require("hardhat-contract-sizer");
+// require("hardhat-contract-sizer");
 require('dotenv').config()
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  contractSizer: {
-    alphaSort: false,
-    disambiguatePaths: true,
-    runOnCompile: true,
-    strict: false,
-    only:['']
-  },
+  // contractSizer: {
+  //   alphaSort: false,
+  //   disambiguatePaths: true,
+  //   runOnCompile: true,
+  //   strict: false,
+  //   only:['']
+  // },
   solidity: {
     compilers: [
       {
@@ -40,6 +40,11 @@ module.exports = {
     avaxtest:{
       url: `${process.env.AVAXTEST_URL}`,
       accounts:[`0x${process.env.PVTKEY}`],
+    },
+    goerlitest:{
+      url: `${process.env.GOERLI_URL}`,
+      accounts:[`0x${process.env.PVTKEY}`],
+
     },
   },
   etherscan: {

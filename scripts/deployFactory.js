@@ -114,37 +114,37 @@ async function main () {
 
     //deploy test token (for local testing on hardhat network)
 
-    let irAgents = [];
-    let tokenAgents = [];
-    let complianceModules = [];
-    let complianceSettings = [];
+    // let irAgents = [];
+    // let tokenAgents = [];
+    // let complianceModules = [];
+    // let complianceSettings = [];
 
-    let tokenDetails = {
-      owner: deployer.address,
-      name: "OTATEST",
-      symbol: "OTAT",
-      decimals: 18,
-      irs: ZERO_ADDRESS,
-      ONCHAINID: ZERO_ADDRESS,
-      irAgents,
-      tokenAgents,
-      complianceModules,
-      complianceSettings
-    }
+    // let tokenDetails = {
+    //   owner: deployer.address,
+    //   name: "OTATEST",
+    //   symbol: "OTAT",
+    //   decimals: 18,
+    //   irs: ZERO_ADDRESS,
+    //   ONCHAINID: ZERO_ADDRESS,
+    //   irAgents,
+    //   tokenAgents,
+    //   complianceModules,
+    //   complianceSettings
+    // }
 
-    let claimTopics = [];
-    let issuers = [];
-    let issuerClaims = [];
-    let claimDetails = {
-      claimTopics,
-      issuers,
-      issuerClaims
-    }
+    // let claimTopics = [];
+    // let issuers = [];
+    // let issuerClaims = [];
+    // let claimDetails = {
+    //   claimTopics,
+    //   issuers,
+    //   issuerClaims
+    // }
 
-    let salt = "randomsalt";
+    // let salt = "randomsalt";
 
-    await trexFactory.deployTREXSuite(salt, tokenDetails, claimDetails);
-    console.log("Token Deployed: ");
+    // await trexFactory.deployTREXSuite(salt, tokenDetails, claimDetails);
+    // console.log("Token Deployed: ");
 
 }
 main()
