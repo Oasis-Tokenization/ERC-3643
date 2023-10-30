@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "generateKey": "npx hardhat run scripts/generateKey.js",
+    "deployIdentity": "npx hardhat run scripts/deployIdentityForAccount.js --network polygon"
   },
   "author": "",
   "license": "ISC",
@@ -19,7 +21,7 @@
   },
   "dependencies": {
     "@nomiclabs/hardhat-solhint": "^3.0.1",
-    "@onchain-id/solidity": "^2.1.0",
+    "@onchain-id/solidity": "^2.2.0",
     "@openzeppelin/contracts": "^4.9.3",
     "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "dotenv": "^16.3.1"

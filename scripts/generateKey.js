@@ -12,7 +12,7 @@ async function main () {
     const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
     const DEAD_ADDRESS = '0x000000000000000000000000000000000000dEaD';
 
-    console.log("key: ", web3.utils.keccak256(web3.eth.abi.encodeParameter("address", process.env.KEY_GEN)));
+    console.log("key: ", web3.utils.keccak256(web3.eth.abi.encodeParameter("address", process.env.ADDR)));
     
 }
 main()

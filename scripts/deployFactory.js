@@ -12,7 +12,6 @@ function sleep(ms) {
 
 async function main () {
     const [deployer] = await ethers.getSigners();
-    const { chainId } = await ethers.provider.getNetwork();
     const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
     const DEAD_ADDRESS = '0x000000000000000000000000000000000000dEaD';
 
@@ -26,50 +25,66 @@ async function main () {
     const TIR = await ethers.getContractFactory("TrustedIssuersRegistry");
     const COMPLIANCE = await ethers.getContractFactory("ModularCompliance");
 
-    //deploy TREXCONTRACTS see ITREXImplementationAuthority.sol interface for implementation struct details
+    // deploy TREXCONTRACTS see ITREXImplementationAuthority.sol interface for implementation struct details
     let tir = await TIR.deploy();
+    await tir.waitForDeployment();
     console.log("TIR: ", tir.target);
-    await sleep(3000);
-    await tir.init();
+    await sleep(5000);
+    let estimatedGas = await tir.init.estimateGas();
+    console.log("estimated gas for TIR init : ", estimatedGas);
+    let tirInitTx = await tir.init();
+    await tirInitTx.wait();
     console.log("TIR impl initialized");
-    await sleep(3000);
+    await sleep(5000);
     
     let ctr = await CTR.deploy();
+    await ctr.waitForDeployment();
     console.log("CTR: ", ctr.target);
-    await sleep(3000);
-    await ctr.init();
+    await sleep(5000);
+    estimatedGas = await ctr.init.estimateGas();
+    console.log("estimated gas for CTR init: ", estimatedGas);
+    let ctrInitTx = await ctr.init({gasLimit: estimatedGas * BigInt(2)});
+    await ctrInitTx.wait();
     console.log("CTR impl initialized");
-    await sleep(3000);
+    await sleep(5000);
 
     let irs = await IRS.deploy();
+    await irs.waitForDeployment();
     console.log("IRS: ", irs.target);
-    await sleep(3000);
-    await irs.init();
+    await sleep(5000);
+    let irsInitTx = await irs.init();
+    await irsInitTx.wait();
     console.log("IRS impl initialized");
-    await sleep(3000);
+    await sleep(5000);
 
     let ir = await IR.deploy();
+    await ir.waitForDeployment();
     console.log("IR: ", ir.target);
-    await sleep(3000);
-    await ir.init(tir.target, ctr.target, irs.target);
+    await sleep(5000);
+    let irInitTx = await ir.init(tir.target, ctr.target, irs.target);
+    await irInitTx.wait();
     console.log("IR impl initialized");
-    await sleep(3000);
+    await sleep(5000);
 
     let compliance = await COMPLIANCE.deploy();
+    await compliance.waitForDeployment();
     console.log("Compliance: ", compliance.target);
-    await sleep(3000);
-    await compliance.init();
+    await sleep(5000);
+    let complianceInitTx = await compliance.init();
+    await complianceInitTx.wait();
     console.log("Compliance impl initialized");
-    await sleep(3000);
+    await sleep(5000);
 
     let token = await TOKENIMPL.deploy();
+    await token.waitForDeployment();
     console.log("Token Implementation: ", token.target);
-    await sleep(3000);
-    await token.init(ir.target, compliance.target, "dead", "dead", 18, ZERO_ADDRESS);
+    await sleep(5000);
+    let tokenInitTx = await token.init(ir.target, compliance.target, "dead", "dead", 18, ZERO_ADDRESS);
+    await tokenInitTx.wait();
     console.log("Token impl initialized");
-    await sleep(3000);
+    await sleep(5000);
 
-    //TREXContracts
+    // //TREXContracts
     let TREXcontracts = {
         tokenImplementation: token.target,
         ctrImplementation: ctr.target,
@@ -86,65 +101,39 @@ async function main () {
         patch: 1
     }
 
-    //deploy implementation authority
+    // deploy implementation authority
     let implementationAuth = await IMPLAUTH.deploy(true, ZERO_ADDRESS, ZERO_ADDRESS);
-    await sleep(3000);
+    await implementationAuth.waitForDeployment();
+    await sleep(5000);
     console.log("Reference Impl Auth : ", implementationAuth.target);
-    await implementationAuth.addAndUseTREXVersion(TREXversion, TREXcontracts);
+    let addAndUseTx = await implementationAuth.addAndUseTREXVersion(TREXversion, TREXcontracts);
+    await addAndUseTx.wait();
     console.log("addAndUseTREXVersion success", );
-    await sleep(3000);
+    await sleep(5000);
 
     // deploy and set up TREX Token Factory
-    let trexFactory = await TREXFACTORY.deploy (implementationAuth.target);
+    let trexFactory = await TREXFACTORY.deploy(implementationAuth.target);
+    await trexFactory.waitForDeployment();
     console.log("TREX Factory: ", trexFactory.target);
-    await sleep(3000);
+    await sleep(5000);
 
     // deploy IAFactory
     let iaFactory = await IAFACTORY.deploy(trexFactory.target);
+    await iaFactory.waitForDeployment();
     console.log("IAFactory :", iaFactory.target);
-    await sleep(3000);
+    await sleep(5000);
 
     //set up implementation authority
-    await implementationAuth.setTREXFactory(trexFactory.target);
+    let setTrexTx = await implementationAuth.setTREXFactory(trexFactory.target);
+    await setTrexTx.wait();
     console.log("IAFactory: setTREXFactory success");
-    await sleep(3000);
-    await implementationAuth.setIAFactory(iaFactory.target);
+    await sleep(5000);
+    let setIaFactTx = await implementationAuth.setIAFactory(iaFactory.target);
+    await setIaFactTx.wait();
     console.log("IAFactory: setIAFactory success");
-    await sleep(3000);
+    await sleep(5000);
 
-    //deploy test token (for local testing on hardhat network)
-
-    // let irAgents = [];
-    // let tokenAgents = [];
-    // let complianceModules = [];
-    // let complianceSettings = [];
-
-    // let tokenDetails = {
-    //   owner: deployer.address,
-    //   name: "OTATEST",
-    //   symbol: "OTAT",
-    //   decimals: 18,
-    //   irs: ZERO_ADDRESS,
-    //   ONCHAINID: ZERO_ADDRESS,
-    //   irAgents,
-    //   tokenAgents,
-    //   complianceModules,
-    //   complianceSettings
-    // }
-
-    // let claimTopics = [];
-    // let issuers = [];
-    // let issuerClaims = [];
-    // let claimDetails = {
-    //   claimTopics,
-    //   issuers,
-    //   issuerClaims
-    // }
-
-    // let salt = "randomsalt";
-
-    // await trexFactory.deployTREXSuite(salt, tokenDetails, claimDetails);
-    // console.log("Token Deployed: ");
+    
 
 }
 main()

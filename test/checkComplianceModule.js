@@ -26,7 +26,7 @@ describe("TREX Token Testing", async () => {
   const DEAD_ADDRESS = '0x000000000000000000000000000000000000dEaD';
 
   beforeEach( async () => {
-    [otaDeployer, otaSafe1, otaSafe2, methSafe, investor1, investor2, investor3] = await ethers.getSigners();
+    [otaDeployer, otaSafe1, otaSafe2, methSafe, hacker] = await ethers.getSigners();
     
     accounts = await ethers.getSigners();
     provider = await ethers.provider;
@@ -48,6 +48,8 @@ describe("TREX Token Testing", async () => {
     // let CLAIMISSUER = await ethers.getContractFactory("ClaimIssuer");
     let AGENTMANAGER = await ethers.getContractFactory("AgentManager");
     let OWNERMANAGER = await ethers.getContractFactory("OwnerManager");
+    let COUNTRYRESTRICTMODULE = await ethers.getContractFactory("CountryRestrictModule");
+
 
     //SCRIPT 1 - deployFactory.js
     tir = await TIR.deploy();
@@ -64,6 +66,8 @@ describe("TREX Token Testing", async () => {
     
     compliance = await COMPLIANCE.deploy();
     await compliance.init();
+
+    countryRestrictModule = await COUNTRYRESTRICTMODULE.deploy();
 
     token = await TOKENIMPL.deploy();
     await token.init(ir.target, compliance.target, "OTAMETHTEST", "OTAMT", 18, ZERO_ADDRESS);
@@ -125,6 +129,7 @@ describe("TREX Token Testing", async () => {
   
     //SCRIPT 3 - deployToken.js
     //set token details and deploy token
+
     let tokenDetails = {
         owner: otaDeployer.address,
         name: "OTAMETHTEST",
@@ -134,7 +139,7 @@ describe("TREX Token Testing", async () => {
         ONCHAINID: ZERO_ADDRESS,
         irAgents: [],
         tokenAgents: [],
-        complianceModules: [],
+        complianceModules: [countryRestrictModule.target],
         complianceSettings: []
     };
     let claimDetails = {
@@ -142,21 +147,26 @@ describe("TREX Token Testing", async () => {
         issuers: [],
         issuerClaims: []
     };
-    
+
     const TOKENTX = await trexFactory.deployTREXSuite("OTAMT", tokenDetails, claimDetails);
     let receipt = await TOKENTX.wait();
     let event = receipt.logs?.filter((x) => {
         return x.eventName == 'TREXSuiteDeployed'
     });
     deployedToken = await TOKENIMPL.attach(event[0].args._token);
- 
+    console.log("deployer address : ", otaDeployer.address);
+    console.log("token owner : ", await deployedToken.owner());
+
     //SCRIPT 4 - setupManagers.js
     agentManager = await AGENTMANAGER.deploy(deployedToken.target);
+    console.log("agentManager address : ", agentManager.target);
     //grant AgentManager Agent role on Token
     await deployedToken.addAgent(agentManager.target);
     //grant AgentManager Agent role on Identity Registry
     await (await IR.attach(await deployedToken.identityRegistry())).addAgent(agentManager.target);
     //confirm roles were added
+    console.log("Agent Manager is Agent Token ? : ", await deployedToken.isAgent(agentManager.target));
+    console.log("Agent Manager is Agent on IR? : ", await (await IR.attach(await deployedToken.identityRegistry())).isAgent(agentManager.target));
     //grant all (token) operation roles to otaSafe1Identity
     await agentManager.addSupplyModifier(otaSafe1IdAddr);
     await agentManager.addFreezer(otaSafe1IdAddr);
@@ -213,36 +223,12 @@ describe("TREX Token Testing", async () => {
     expect(await otaSafe1Id.getKeyPurposes(otaSafe1Key)).to.include((ethers.getBigInt(1)));
   });
 
-  it("OTA2 Mint", async () => {
-    let investorIdTx = await idGateway.connect(methSafe).deployIdentityForWallet(investor1.address);
-    let investorId = await getIdAddressFromTx(investorIdTx, idFactory.target, investor1.address);
-    await agentManager.connect(otaSafe2).callRegisterIdentity(investor1.address, investorId, 1, otaSafe1IdAddr);
-    expect(await deployedToken.balanceOf(investor1)).to.be.equal(0);
-    await agentManager.connect(otaSafe2).callMint(investor1.address, 50, otaSafe1Id.target);
-    expect(await deployedToken.balanceOf(investor1.address)).to.be.equal(50);
-  });
+  it("Verify Compliance Bug", async () => {
 
-  it("OTA2 Burn", async () => {
-    let investorIdTx = await idGateway.connect(methSafe).deployIdentityForWallet(investor1.address);
-    let investorId = await getIdAddressFromTx(investorIdTx, idFactory.target, investor1.address);
-    await agentManager.connect(otaSafe2).callRegisterIdentity(investor1.address, investorId, 1, otaSafe1IdAddr);
-    expect(await deployedToken.balanceOf(investor1)).to.be.equal(0);
-    await agentManager.connect(otaSafe2).callMint(investor1.address, 50, otaSafe1Id.target);
-    expect(await deployedToken.balanceOf(investor1.address)).to.be.equal(50);
-    await agentManager.connect(otaSafe2).callBurn(investor1.address, 50, otaSafe1IdAddr);
-    expect(await deployedToken.balanceOf(investor1.address)).to.be.equal(0);
-  })
-
-  it("OTA2 FORCED TRANSFER", async () => {
-    let investorIdTx = await idGateway.connect(methSafe).deployIdentityForWallet(investor1.address);
-    let investorId = await getIdAddressFromTx(investorIdTx, idFactory.target, investor1.address);
-    await agentManager.connect(otaSafe2).callRegisterIdentity(investor1.address, investorId, 1, otaSafe1IdAddr);
-    expect(await deployedToken.balanceOf(investor1)).to.be.equal(0);
-    await agentManager.connect(otaSafe2).callMint(investor1.address, 50, otaSafe1Id.target);
-    expect(await deployedToken.balanceOf(investor1.address)).to.be.equal(50);
-  })
-
-  it("OTA2 ", async () => {
+    await countryRestrictModule.connect(hacker).bindCompliance(hacker.address);
+    await countryRestrictModule.connect(hacker).addCountryRestriction(82);
+    await countryRestrictModule.connect(hacker).removeCountryRestriction(82);
     
   });
+
 });

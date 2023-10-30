@@ -18,7 +18,7 @@ async function main () {
 
     const TREXFACTORY = await ethers.getContractFactory("TREXFactory");
  
-    let factory = await TREXFACTORY.attach(process.env.POLYGON_TREXFACTORY);
+    let factory = await TREXFACTORY.attach(process.env.LOCAL_TREXFACTORY);
 
     let tokenDetails = {
         owner: process.env.TOKEN_OWNER,

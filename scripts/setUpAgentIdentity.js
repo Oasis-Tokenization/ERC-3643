@@ -20,7 +20,6 @@ async function main () {
     const IDFACTROY = await ethers.getContractFactory("IdFactory");
     const OWNERMANAGER = await ethers.getContractFactory("OwnerManager");
 
-    let idFactory = await IDFACTROY.attach(process.env.IDFACTORY);
     let agentManager = await AGENTMNGR.attach(process.env.AGENT_MANAGER);
     let ownerManager = await OWNERMANAGER.attach(process.env.OWNER_MANAGER);
 

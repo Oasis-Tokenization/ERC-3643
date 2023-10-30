@@ -18,7 +18,7 @@ async function main () {
 
     const TREXFACTORY = await ethers.getContractFactory("TREXFactory");
  
-    let factory = await TREXFACTORY.attach(process.env.POLYGON_TREXFACTORY);
+    let factory = await TREXFACTORY.attach(process.env.TST_TREXFACTORY);
 
     let tokenDetails = {
         owner: process.env.TOKEN_OWNER,
@@ -39,8 +39,6 @@ async function main () {
         issuerClaims: []
     };
 
-    let estimatedGas = await factory.deployTREXSuite.estimateGas(process.env.TOKEN_SALT, tokenDetails, claimDetails);
-    console.log("estimated gas deployTREXSuite : ", estimatedGas);
     const TX = await factory.deployTREXSuite(process.env.TOKEN_SALT, tokenDetails, claimDetails);
     const RECEIPT = await TX.wait();
     const EVENT = RECEIPT.logs?.filter((x) => {
@@ -49,12 +47,6 @@ async function main () {
     let tokenAddr = EVENT[0].args._token;
 
     console.log("TREX TOKEN ADDR : ", tokenAddr);
-    console.log("TREX TOKEN IDENTITY REGISTRY : ", EVENT[0].args._ir);
-    console.log("TREX TOKEN IR STORAGE: ", EVENT[0].args._irs);
-    console.log("TREX TOKEN TIR: ", EVENT[0].args._tir);
-    console.log("TREX TOKEN CLAIM TOPICS REGISTRY : ", EVENT[0].args._ctr);
-    console.log("TREX TOKEN MODULAR COMPLIANCE : ", EVENT[0].args._mc);
-    console.log("TREX TOKEN SALT : ", EVENT[0].args._salt);
     
 }
 main()

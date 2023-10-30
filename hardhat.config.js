@@ -1,6 +1,7 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('@nomiclabs/hardhat-truffle5');
 require("@nomiclabs/hardhat-web3");
+require("@nomicfoundation/hardhat-ethers");
 // require("hardhat-contract-sizer");
 require('dotenv').config()
 
@@ -46,6 +47,14 @@ module.exports = {
       accounts:[`0x${process.env.PVTKEY}`],
 
     },
+    sepoliatest:{
+      url: `${process.env.SEPOLIA_URL}`,
+      accounts:[`0x${process.env.PVTKEY}`]
+    },
+    polygon:{
+      url: `${process.env.POLYGON_URL}`,
+      accounts:[`0x${process.env.PVTKEY}`]
+    },
   },
   etherscan: {
     apiKey: {
@@ -53,7 +62,8 @@ module.exports = {
       sepolia: `${process.env.ETH_API}`,
       avalancheFujiTestnet: `${process.env.AVAX_API}`,
       polygonMumbai: `${process.env.MUMBAI_API}`,
-      optimisticGoerli: `${process.env.OPT_API}`
+      optimisticGoerli: `${process.env.OPT_API}`,
+      polygon : `${process.env.MUMBAI_API}`
     }
   },
 };

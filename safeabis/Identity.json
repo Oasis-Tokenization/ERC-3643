@@ -1,0 +1,31 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "_key",
+				"type": "bytes32"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_purpose",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_type",
+				"type": "uint256"
+			}
+		],
+		"name": "addKey",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
