@@ -39,12 +39,7 @@ async function main () {
     const GATEWAY = await ethers.getContractFactory("Gateway");
     const IDENTITY = await ethers.getContractFactory("Identity");
 
-    let tir = await TIR.attach(process.env.POLYGON_TEST_TIR);
-    let ctr = await CTR.attach(process.env.POLYGON_TEST_CTR);
-    let mc = await MC.attach(process.env.POLYGON_TEST_MC);
-    let irs = await IRS.attach(process.env.POLYGON_TEST_IRS);
-    let ir = await IR.attach(process.env.POLYGON_TEST_IR);
-    let token = await TOKEN.attach(process.env.POLYGON_TEST_TOKEN);
+   
 
     // // Uncomment and uses below code if having rpc issues with tx gas estimations and pricing // //
     // let provider = ethers.getDefaultProvider(process.env.POLYGON_URL);
@@ -55,54 +50,40 @@ async function main () {
     // console.log("gas price : ", feeData.gasPrice);
     // console.log("gas price x 1.2", Math.round(Number(feeData.gasPrice) * 1.2));
 
-    let otaControllerIdentity = process.env.POLYGON_OTA1_IDENTITY;
+    let ownerIdentity = process.env.POLYGON_OWNER_IDENTITY;
+    let ownerManager = await OWNERMANAGER.attach(process.env.POLYGON_OWNER_MULTISIG);
 
-    let agentManager = await AGENTMNGR.deploy(process.env.POLYGON_TEST_TOKEN);
-    await agentManager.waitForDeployment();
-    console.log("AgentManager addr: ", agentManager.target, " Linked to Token : ", process.env.POLYGON_TEST_TOKEN);
-    await sleep(3000);
 
-    //Add AgentManager as Agent on Identity Registry
 
-    await ir.addAgent(agentManager.target);
-    console.log("IdentityRegistry agent added (on identity registry contract): (AgentManager: ", agentManager.target, ")");
-    await sleep(3000);
+    // gasEst = await agentManager.addSupplyModifier.estimateGas(otaControllerIdentity);
+    // await agentManager.addSupplyModifier(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
+    // console.log("AgentManager: Added Supply Modifier : ", otaControllerIdentity);
+    // await sleep(3000);
+    // gasEst = await agentManager.addWhiteListManager.estimateGas(otaControllerIdentity);
+    // await agentManager.addWhiteListManager(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
+    // console.log("AgentManager: Added WhiteList Manager: ", otaControllerIdentity);
+    // await sleep(3000);
+    // gasEst = await agentManager.addFreezer.estimateGas(otaControllerIdentity);
+    // await agentManager.addFreezer(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
+    // console.log("AgentManager: Added Freezer: ", otaControllerIdentity);
+    // await sleep(3000);
+    // gasEst = await agentManager.addTransferManager.estimateGas(otaControllerIdentity);
+    // await agentManager.addTransferManager(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
+    // console.log("AgentManager: Added TransferManager: ", otaControllerIdentity);
+    // await sleep(3000);
+    // gasEst = await agentManager.addRecoveryAgent.estimateGas(otaControllerIdentity);
+    // await agentManager.addRecoveryAgent(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
+    // console.log("AgentManager: Added RecoveryAgent: ", otaControllerIdentity);
+    // await sleep(3000);
+    // gasEst = await agentManager.addComplianceAgent.estimateGas(otaControllerIdentity);
+    // await agentManager.addComplianceAgent(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
+    // console.log("AgentManager: Added Compliance Agent: ", otaControllerIdentity);
+    // await sleep(3000);
 
-    //Add AgentManager as Agent on Token
-    let gasEst = await token.addAgent.estimateGas(agentManager.target);
-    await token.addAgent(agentManager.target, {gasLimit: gasEst * BigInt(2)});
-    console.log("Token agent added (on token contract): (AgentManager: ", agentManager.target, ")");
-    await sleep(3000);
-
-    gasEst = await agentManager.addSupplyModifier.estimateGas(otaControllerIdentity);
-    await agentManager.addSupplyModifier(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
-    console.log("AgentManager: Added Supply Modifier : ", otaControllerIdentity);
-    await sleep(3000);
-    gasEst = await agentManager.addWhiteListManager.estimateGas(otaControllerIdentity);
-    await agentManager.addWhiteListManager(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
-    console.log("AgentManager: Added WhiteList Manager: ", otaControllerIdentity);
-    await sleep(3000);
-    gasEst = await agentManager.addFreezer.estimateGas(otaControllerIdentity);
-    await agentManager.addFreezer(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
-    console.log("AgentManager: Added Freezer: ", otaControllerIdentity);
-    await sleep(3000);
-    gasEst = await agentManager.addTransferManager.estimateGas(otaControllerIdentity);
-    await agentManager.addTransferManager(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
-    console.log("AgentManager: Added TransferManager: ", otaControllerIdentity);
-    await sleep(3000);
-    gasEst = await agentManager.addRecoveryAgent.estimateGas(otaControllerIdentity);
-    await agentManager.addRecoveryAgent(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
-    console.log("AgentManager: Added RecoveryAgent: ", otaControllerIdentity);
-    await sleep(3000);
-    gasEst = await agentManager.addComplianceAgent.estimateGas(otaControllerIdentity);
-    await agentManager.addComplianceAgent(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
-    console.log("AgentManager: Added Compliance Agent: ", otaControllerIdentity);
-    await sleep(3000);
-
-    let ownerManager = await OWNERMANAGER.deploy(process.env.POLYGON_TEST_TOKEN);
-    await ownerManager.waitForDeployment();
-    console.log("OwnerManager addr : ", ownerManager.target, " Linked to Token : ", process.env.POLYGON_TEST_TOKEN);
-    await sleep(3000);
+    // let ownerManager = await OWNERMANAGER.deploy(process.env.POLYGON_TEST_TOKEN);
+    // await ownerManager.waitForDeployment();
+    // console.log("OwnerManager addr : ", ownerManager.target, " Linked to Token : ", process.env.POLYGON_TEST_TOKEN);
+    // await sleep(3000);
 
     gasEst = await token.transferOwnership.estimateGas(ownerManager.target);
     console.log("est gas Token.sol, transferOwnership: ", gasEst);

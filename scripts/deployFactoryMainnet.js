@@ -1,5 +1,5 @@
 const BN = require("ethers").BigNumber;
-const { ethers, web3 } = require("hardhat");
+const { Hre, ethers, web3 } = require("hardhat");
 const {
     time, 
     constants,
@@ -26,27 +26,37 @@ async function main () {
     const COMPLIANCE = await ethers.getContractFactory("ModularCompliance");
 
     // deploy TREXCONTRACTS see ITREXImplementationAuthority.sol interface for implementation struct details
-    let tir = await TIR.deploy();
-    await tir.waitForDeployment();
-    console.log("TIR: ", tir.target);
-    await sleep(5000);
-    let estimatedGas = await tir.init.estimateGas();
-    console.log("estimated gas for TIR init : ", estimatedGas);
-    let tirInitTx = await tir.init();
-    await tirInitTx.wait();
-    console.log("TIR impl initialized");
-    await sleep(5000);
+    let tir = await TIR.attach("0xaf1962ee77b60f591246349f671279f5d9b7c296");
+    // await tir.waitForDeployment();
+    // console.log("TIR: ", tir.target);
+    // await sleep(5000);
+    // let estimatedGas = await tir.init.estimateGas();
+    // console.log("estimated gas for TIR init : ", estimatedGas);
+    // let tirInitTx = await tir.init();
+    // await tirInitTx.wait();
+    // console.log("TIR impl initialized");
+    // await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: tir.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[],
+    //     contract: "contracts/registry/implementation/TrustedIssuersRegistry.sol:TrustedIssuersRegistry",
+    // });
     
-    let ctr = await CTR.deploy();
-    await ctr.waitForDeployment();
-    console.log("CTR: ", ctr.target);
-    await sleep(5000);
-    estimatedGas = await ctr.init.estimateGas();
-    console.log("estimated gas for CTR init: ", estimatedGas);
-    let ctrInitTx = await ctr.init({gasLimit: estimatedGas * BigInt(2)});
-    await ctrInitTx.wait();
-    console.log("CTR impl initialized");
-    await sleep(5000);
+    let ctr = await CTR.attach("0x417E41a73B1B323b0Ca7dC063041783D9be59F41");
+    // await ctr.waitForDeployment();
+    // console.log("CTR: ", ctr.target);
+    // await sleep(5000);
+    // let ctrInitTx = await ctr.init();
+    // await ctrInitTx.wait();
+    // console.log("CTR impl initialized");
+    // await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: ctr.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[],
+    //     contract: "contracts/registry/implementation/ClaimTopicsRegistry.sol:ClaimTopicsRegistry",
+    // });
 
     let irs = await IRS.deploy();
     await irs.waitForDeployment();
@@ -56,6 +66,12 @@ async function main () {
     await irsInitTx.wait();
     console.log("IRS impl initialized");
     await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: irs.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[],
+    //     contract: "contracts/registry/implementation/IdentityRegistryStorage.sol:IdentityRegistryStorage",
+    // });
 
     let ir = await IR.deploy();
     await ir.waitForDeployment();
@@ -65,6 +81,12 @@ async function main () {
     await irInitTx.wait();
     console.log("IR impl initialized");
     await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: ir.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[],
+    //     contract: "contracts/registry/implementation/IdentityRegistry.sol:IdentityRegistry",
+    // });
 
     let compliance = await COMPLIANCE.deploy();
     await compliance.waitForDeployment();
@@ -74,6 +96,12 @@ async function main () {
     await complianceInitTx.wait();
     console.log("Compliance impl initialized");
     await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: compliance.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[],
+    //     contract: "contracts/compliance/modular/ModularCompliance.sol:ModularCompliance",
+    // });
 
     let token = await TOKENIMPL.deploy();
     await token.waitForDeployment();
@@ -84,6 +112,13 @@ async function main () {
     await tokenInitTx.wait();
     console.log("Token impl initialized");
     await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: token.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[],
+    //     contract: "contracts/token/Token.sol:Token",
+    // });
+
 
     // //TREXContracts
     let TREXcontracts = {
@@ -111,18 +146,37 @@ async function main () {
     await addAndUseTx.wait();
     console.log("addAndUseTREXVersion success", );
     await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: implementationAuth.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[true, '0x0000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000'],
+    //     contract: "contracts/proxy/authority/TREXImplementationAuthority.sol:TREXImplementationAuthority",
+    // });
+    // await sleep(3000);
 
     // deploy and set up TREX Token Factory
     let trexFactory = await TREXFACTORY.deploy(implementationAuth.target);
     await trexFactory.waitForDeployment();
     console.log("TREX Factory: ", trexFactory.target);
     await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: trexFactory.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[implementationAuth.target],
+    //     contract: "contracts/factory/TREXFactory.sol:TREXFactory",
+    // });
 
     // deploy IAFactory
     let iaFactory = await IAFACTORY.deploy(trexFactory.target);
     await iaFactory.waitForDeployment();
     console.log("IAFactory :", iaFactory.target);
     await sleep(5000);
+    // await Hre.run("verify:verify", {
+    //     address: iaFactory.target,
+    //     //Path of your main contract.
+    //     constructorArguments:[trexFactory.target],
+    //     contract: "contracts/proxy/authority/IAFactory.sol:IAFactory",
+    // });
 
     //set up implementation authority
     let setTrexTx = await implementationAuth.setTREXFactory(trexFactory.target);

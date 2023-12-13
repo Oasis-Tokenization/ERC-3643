@@ -26,11 +26,13 @@ async function main () {
     const [deployer] = await ethers.getSigners();
 
     const IDFACTORY = await ethers.getContractFactory("IdFactory");
+    const GATEWAY = await ethers.getContractFactory("Gateway");
     let idFactory = await IDFACTORY.attach(process.env.LOCAL_IDFACTORY);
-    const TX = await idFactory.createIdentity(process.env.IDFOR, process.env.IDFOR);
+    let gateway = await GATEWAY.attach(process.env.LOCAL_GATEWAY);
+    const TX = await gateway.deployIdentityForWallet(process.env.ADDR);
     let receipt = await TX.wait();
     console.log('ID DEPLOYED : ', receipt);
-    let addr = await getIdAddressFromTx(receipt, process.env.LOCAL_IDFACTORY, process.env.IDFOR);
+    let addr = await getIdAddressFromTx(receipt, process.env.LOCAL_IDFACTORY, process.env.ADDR);
     console.log("Identity address : ", addr);
 
 }

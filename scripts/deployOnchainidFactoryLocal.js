@@ -25,12 +25,12 @@ async function main () {
     //deploy identity implementation and implementation authority, link implementation
     let idImpl = await IDENTITY.deploy(DEAD_ADDRESS, true);
     await idImpl.waitForDeployment();
-    await sleep(5000);
+    // await sleep(5000);
     console.log("Identity Implementation : ", idImpl.target);
     let implAuth = await IMPLAUTH.deploy(idImpl.target);
     await implAuth.waitForDeployment();
     console.log("ImplementationAuthority (linked to Identity): ", implAuth.target);
-    await sleep(5000);
+    // await sleep(5000);
 
     //deploy IDFactory
     let idFactory = await IDFACTORY.deploy(implAuth.target);
@@ -38,15 +38,15 @@ async function main () {
     console.log("IdFactory : ", idFactory.target);
     // await sleep(5000);
 
-    // //deploy gateway
-    // let signersToApprove = [deployer.address];
-    // let gateway = await GATEWAY.deploy(idFactory.target, signersToApprove);
-    // console.log("gateway deployed : ", gateway.target);
+    //deploy gateway
+    let signersToApprove = [];
+    let gateway = await GATEWAY.deploy(idFactory.target, signersToApprove);
+    console.log("gateway deployed : ", gateway.target);
     // await sleep(3000);
 
-    // //set gateway as owner on id factory
-    // await idFactory.transferOwnership(gateway.target);
-    // console.log("IdFactory ownership transferred to gateway");
+    //set gateway as owner on id factory
+    await idFactory.transferOwnership(gateway.target);
+    console.log("IdFactory ownership transferred to gateway");
     // await sleep(3000);
     
     //deploy identity on behalf of investor

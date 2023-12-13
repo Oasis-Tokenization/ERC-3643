@@ -26,7 +26,7 @@ describe("TREX Token Testing", async () => {
   const DEAD_ADDRESS = '0x000000000000000000000000000000000000dEaD';
 
   beforeEach( async () => {
-    [otaDeployer, otaSafe1, otaSafe2, methSafe, hacker] = await ethers.getSigners();
+    [otaDeployer, otaSafe1, otaSafe2, methSafe, hacker, kycClaimIssuer, investor] = await ethers.getSigners();
     
     accounts = await ethers.getSigners();
     provider = await ethers.provider;
@@ -49,7 +49,7 @@ describe("TREX Token Testing", async () => {
     let AGENTMANAGER = await ethers.getContractFactory("AgentManager");
     let OWNERMANAGER = await ethers.getContractFactory("OwnerManager");
     let COUNTRYRESTRICTMODULE = await ethers.getContractFactory("CountryRestrictModule");
-
+    let CLAIMISSUER = await ethers.getContractFactory("ClaimIssuer");
 
     //SCRIPT 1 - deployFactory.js
     tir = await TIR.deploy();
@@ -67,10 +67,11 @@ describe("TREX Token Testing", async () => {
     compliance = await COMPLIANCE.deploy();
     await compliance.init();
 
-    countryRestrictModule = await COUNTRYRESTRICTMODULE.deploy();
-
     token = await TOKENIMPL.deploy();
     await token.init(ir.target, compliance.target, "OTAMETHTEST", "OTAMT", 18, ZERO_ADDRESS);
+
+    claimIssuerIdentity = await CLAIMISSUER.deploy(kycClaimIssuer.address);
+    console.log("Claim Issuer Identity : ", claimIssuerIdentity.target);
 
     let TREXcontracts = {
         tokenImplementation: token.target,
@@ -132,20 +133,20 @@ describe("TREX Token Testing", async () => {
 
     let tokenDetails = {
         owner: otaDeployer.address,
-        name: "OTAMETHTEST",
-        symbol: "OTAMT",
+        name: "OPMTEST102023A",
+        symbol: "OPMTEST102023A",
         decimals: 18,
         irs: ZERO_ADDRESS,
         ONCHAINID: ZERO_ADDRESS,
         irAgents: [],
         tokenAgents: [],
-        complianceModules: [countryRestrictModule.target],
+        complianceModules: [],
         complianceSettings: []
     };
     let claimDetails = {
-        claimTopics: [],
-        issuers: [],
-        issuerClaims: []
+        claimTopics: [1],
+        issuers: [claimIssuerIdentity.target],
+        issuerClaims: [[1]]
     };
 
     const TOKENTX = await trexFactory.deployTREXSuite("OTAMT", tokenDetails, claimDetails);
@@ -189,27 +190,27 @@ describe("TREX Token Testing", async () => {
     deployedIssuersRegistry = await TIR.attach(await deployedIdentityRegistry.issuersRegistry());  
     deployedTopicsRegistry = await CTR.attach(await deployedIdentityRegistry.topicsRegistry());
     
-    //transfer ownership of token contracts to ownerManager
-    await token.transferOwnership(ownerManager.target);
-    await deployedIdentityRegistry.transferOwnership(ownerManager.target);
-    await deployedIssuersRegistry.transferOwnership(ownerManager.target);
-    await deployedTopicsRegistry.transferOwnership(ownerManager.target);
-    await deployedCompliance.transferOwnership(ownerManager.target);
+    // //transfer ownership of token contracts to ownerManager
+    // await token.transferOwnership(ownerManager.target);
+    // await deployedIdentityRegistry.transferOwnership(ownerManager.target);
+    // await deployedIssuersRegistry.transferOwnership(ownerManager.target);
+    // await deployedTopicsRegistry.transferOwnership(ownerManager.target);
+    // await deployedCompliance.transferOwnership(ownerManager.target);
 
-    //SCRIPT 5 - transferOwnershipAndVerify.js
-    await trexFactory.transferOwnership(methSafe.address);
-    await implementationAuth.transferOwnership(methSafe.address);
-    await idGateway.transferOwnership(methSafe.address);
-    await implAuthId.transferOwnership(methSafe.address);
-    await ownerManager.transferOwnership(methSafe.address);
-    await agentManager.transferOwnership(methSafe.address);
+    // //SCRIPT 5 - transferOwnershipAndVerify.js
+    // await trexFactory.transferOwnership(methSafe.address);
+    // await implementationAuth.transferOwnership(methSafe.address);
+    // await idGateway.transferOwnership(methSafe.address);
+    // await implAuthId.transferOwnership(methSafe.address);
+    // await ownerManager.transferOwnership(methSafe.address);
+    // await agentManager.transferOwnership(methSafe.address);
     //DO WE NEED TO PASS IMPLEMENTATION CONTRACTS?  I see no pressing need
 
   })  
 
   it("Token Details", async() => {
-    expect(await deployedToken.name()).to.be.equal("OTAMETHTEST");
-    expect(await deployedToken.symbol()).to.be.equal("OTAMT");
+    expect(await deployedToken.name()).to.be.equal("OPMTEST102023A");
+    expect(await deployedToken.symbol()).to.be.equal("OPMTEST102023A");
     expect(await deployedToken.decimals()).to.be.equal(18);
   });
 
@@ -223,6 +224,32 @@ describe("TREX Token Testing", async () => {
     expect(await otaSafe1Id.getKeyPurposes(otaSafe1Key)).to.include((ethers.getBigInt(1)));
   });
 
+  it("Verify Claim Issuances are required to hold token", async () => {
+    let investorIdentityTx = await idGateway.deployIdentityForWallet(investor.address);
+    let investorIdentity = await getIdAddressFromTx(investorIdentityTx, idFactory.target, investor.address);
+    let investorIdentityContract = await (await ethers.getContractFactory("Identity")).attach(investorIdentity);
+    await agentManager.connect(otaSafe2).callRegisterIdentity(investor.address, investorIdentity, 1, otaSafe1IdAddr);
 
+    let mintAmount = '1000000000000000000000';
+    await expect(agentManager.connect(otaSafe2).callMint(investor.address, mintAmount, otaSafe1IdAddr)).to.be.revertedWith("Identity is not verified.");
+
+    let dataString = await ethers.id("https://ipfs.org");
+    // let data = await ethers.getBytes(dataString);
+    // let preparedClaim = await web3.utils.keccak256(await ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'bytes'], [investorIdentity, 1, data]));
+    let claimSignature = await kycClaimIssuer.signMessage(await ethers.getBytes(await ethers.keccak256(await ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'bytes'], [investorIdentity, 1, dataString]))));
+    // let claimSignature = await kycClaimIssuer.signMessage(await ethers.keccak256(await ethers.AbiCoder.defaultAbiCoder().encode(['address', 'uint256', 'bytes'], [investorIdentity, 1, dataString])));
+
+    await investorIdentityContract.connect(investor).addClaim(1, 1, claimIssuerIdentity.target, claimSignature, dataString, "https://ipfs.org");
+
+    await agentManager.connect(otaSafe2).callMint(investor.address, mintAmount, otaSafe1IdAddr);
+
+    await expect(await deployedToken.balanceOf(investor.address)).to.be.equal(mintAmount);
+
+  });
+
+  it("Deploy new TREXImplementationAuthority and link to token", async () => {
+    await trexFactory.recoverContractOwnership((await deployedIdentityRegistry.identityStorage()), otaDeployer.address);
+    await implementationAuth.changeImplementationAuthority(deployedToken.target, ethers.ZeroAddress);
+  });
 
 });

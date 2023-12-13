@@ -46,8 +46,8 @@ async function main () {
     await sleep(5000);
 
     //set gateway as owner on id factory
-    let estimatedGas = await idFactory.transferOwnership.estimateGas(gateway.target);
-    await idFactory.transferOwnership(gateway.target, { gasLimit: estimatedGas * BigInt(2) });
+    let tx = await idFactory.transferOwnership(gateway.target);
+    await tx.wait();
     console.log("IdFactory ownership transferred to gateway");
     await sleep(5000);
     

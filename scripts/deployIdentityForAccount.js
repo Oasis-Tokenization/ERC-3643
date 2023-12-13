@@ -27,7 +27,7 @@ async function main () {
 
     const GATEWAY = await ethers.getContractFactory("Gateway");
     let gateway = await GATEWAY.attach(process.env.POLYGON_GATEWAY);
-    let estGas = await gateway.deployIdentityForWallet.estimateGas(process.env.IDFOR);
+    let estGas = await gateway.deployIdentityForWallet.estimateGas(process.env.ADDR);
     const TX = await gateway.deployIdentityForWallet(process.env.ADDR, {gasLimit: estGas * BigInt(2)});
     let receipt = await TX.wait();
     await sleep(5000);
