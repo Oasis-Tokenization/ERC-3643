@@ -53,8 +53,6 @@ async function main () {
     let ownerIdentity = process.env.POLYGON_OWNER_IDENTITY;
     let ownerManager = await OWNERMANAGER.attach(process.env.POLYGON_OWNER_MULTISIG);
 
-
-
     // gasEst = await agentManager.addSupplyModifier.estimateGas(otaControllerIdentity);
     // await agentManager.addSupplyModifier(otaControllerIdentity, {gasLimit: gasEst * BigInt(2)});
     // console.log("AgentManager: Added Supply Modifier : ", otaControllerIdentity);
@@ -85,38 +83,38 @@ async function main () {
     // console.log("OwnerManager addr : ", ownerManager.target, " Linked to Token : ", process.env.POLYGON_TEST_TOKEN);
     // await sleep(3000);
 
-    gasEst = await token.transferOwnership.estimateGas(ownerManager.target);
-    console.log("est gas Token.sol, transferOwnership: ", gasEst);
-    // console.log("est gas price : ", feeData.gasPrice);
-    let tx = await token.transferOwnership(ownerManager.target);
-    await tx.wait();
-    console.log("Token: ", token.target," Ownership Transferred to OwnerManager : ", ownerManager.target);
-    await sleep(3000);
-    gasEst = await ir.transferOwnership.estimateGas(ownerManager.target);
-    feeData = await provider.getFeeData();
-    console.log("est gas IdentityRegistry.sol, transferOwnership: ", gasEst);
-    console.log("est gas price: ", feeData.gasPrice);
-    tx = await ir.transferOwnership(ownerManager.target);
-    await tx.wait();
-    console.log("Identity Registry: ", ir.target ," Ownership Transferred to OwnerManager : ", ownerManager.target);
-    await sleep(3000);
-    gasEst = await tir.transferOwnership.estimateGas(ownerManager.target);
-    console.log("est gas TrustedIssuersRegistry.sol, transferOwnership(): ", gasEst);
-    tx = await tir.transferOwnership(ownerManager.target);
-    await tx.wait();
-    console.log("Trusted Issuers Registry: ", tir.target ," Ownership Transferred to OwnerManager : ", ownerManager.target);
-    await sleep(3000);
-    gasEst = await ctr.transferOwnership.estimateGas(ownerManager.target);
-    console.log("est gas ClaimTopicsRegistry.sol, transferOwnership(): ", gasEst);
-    tx = await ctr.transferOwnership(ownerManager.target);
-    await tx.wait();
-    console.log("ClaimTopicsRegistry: ", ctr.target , " Ownership Transferred to OwnerManager : ", ownerManager.target);
-    await sleep(3000);
-    gasEst = await mc.transferOwnership.estimateGas(ownerManager.target);
-    console.log("est gas ModularCompliance.sol, transferOwnership(): ", gasEst);
-    tx = await mc.transferOwnership(ownerManager.target);
-    await tx.wait();
-    console.log("ModularCompliance: ", mc.target , " Ownership Transferred to OwnerManager : ", ownerManager.target);
+    // gasEst = await token.transferOwnership.estimateGas(ownerManager.target);
+    // console.log("est gas Token.sol, transferOwnership: ", gasEst);
+    // // console.log("est gas price : ", feeData.gasPrice);
+    // let tx = await token.transferOwnership(ownerManager.target);
+    // await tx.wait();
+    // console.log("Token: ", token.target," Ownership Transferred to OwnerManager : ", ownerManager.target);
+    // await sleep(3000);
+    // gasEst = await ir.transferOwnership.estimateGas(ownerManager.target);
+    // feeData = await provider.getFeeData();
+    // console.log("est gas IdentityRegistry.sol, transferOwnership: ", gasEst);
+    // console.log("est gas price: ", feeData.gasPrice);
+    // tx = await ir.transferOwnership(ownerManager.target);
+    // await tx.wait();
+    // console.log("Identity Registry: ", ir.target ," Ownership Transferred to OwnerManager : ", ownerManager.target);
+    // await sleep(3000);
+    // gasEst = await tir.transferOwnership.estimateGas(ownerManager.target);
+    // console.log("est gas TrustedIssuersRegistry.sol, transferOwnership(): ", gasEst);
+    // tx = await tir.transferOwnership(ownerManager.target);
+    // await tx.wait();
+    // console.log("Trusted Issuers Registry: ", tir.target ," Ownership Transferred to OwnerManager : ", ownerManager.target);
+    // await sleep(3000);
+    // gasEst = await ctr.transferOwnership.estimateGas(ownerManager.target);
+    // console.log("est gas ClaimTopicsRegistry.sol, transferOwnership(): ", gasEst);
+    // tx = await ctr.transferOwnership(ownerManager.target);
+    // await tx.wait();
+    // console.log("ClaimTopicsRegistry: ", ctr.target , " Ownership Transferred to OwnerManager : ", ownerManager.target);
+    // await sleep(3000);
+    // gasEst = await mc.transferOwnership.estimateGas(ownerManager.target);
+    // console.log("est gas ModularCompliance.sol, transferOwnership(): ", gasEst);
+    // tx = await mc.transferOwnership(ownerManager.target);
+    // await tx.wait();
+    // console.log("ModularCompliance: ", mc.target , " Ownership Transferred to OwnerManager : ", ownerManager.target);
 
     // IMPORTANT :: execute these functions are they are mandatory once Methodic1 identity is known
     // ownerManager
